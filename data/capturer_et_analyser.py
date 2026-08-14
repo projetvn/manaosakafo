@@ -73,7 +73,7 @@ def analyser_avec_gemini(image_bytes):
         "Les ingredients visibles sur cette photo sont deja physiquement "
         "presents dans le recipient, MAIS a l'etat brut : non epluches, "
         "non coupes, non laves, tels qu'ils sortent du marche ou du frigo. "
-        "Identifie les ingredients presents sur la photo, puis propose 2 "
+        "Identifie les ingredients presents sur la photo, puis propose tous les "
         "plats realisables avec ces ingredients, prepares en deux phases "
         "distinctes et sans AUCUNE intervention humaine entre les deux : "
         "\n\n"
