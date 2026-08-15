@@ -38,5 +38,4 @@ float Ultrason::calculDistance()
   distance = v*t/2;
 
   return distance;
-
 }
