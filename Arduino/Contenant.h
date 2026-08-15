@@ -14,7 +14,6 @@ class Contenant
   private:
     int pin;
     Servo servoContenant;
-
 };
 
 #endif
