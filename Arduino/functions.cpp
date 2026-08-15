@@ -8,7 +8,7 @@ void detectionPresence()
   Ultrason U;
   U.setPinEcho(8);
   U.setPinTrig(7);
-  if(U.calculDistance()<d)
+  if(U.calculDistance()<d || U.calculDistance()>23)
   {
     Serial.println("P");
   }

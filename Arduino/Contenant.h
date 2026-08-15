@@ -15,6 +15,6 @@ class Contenant
     int pin;
     Servo servoContenant;
 
-}
+};
 
 #endif
