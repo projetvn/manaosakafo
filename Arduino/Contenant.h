@@ -7,12 +7,11 @@ class Contenant
   public:
     Contenant();
     ~Contenant();
-    void setPin(int p);
+    void miseEnPlace(int p);
     void verser(float angle);
     void remettreEnPlace(float angle);
   
   private:
-    int pin;
     Servo servoContenant;
 };
 

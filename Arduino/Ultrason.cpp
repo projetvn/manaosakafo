@@ -14,11 +14,13 @@ Ultrason::~Ultrason()
 void Ultrason::setPinEcho(int p)
 {
   pinEcho = p;
+  pinMode(pinEcho, INPUT);
 }
 
 void Ultrason::setPinTrig(int p)
 {
   pinTrig = p;
+  pinMode(pinTrig, OUTPUT);
 }
 
 float Ultrason::calculDistance()

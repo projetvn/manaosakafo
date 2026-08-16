@@ -10,10 +10,9 @@ Contenant::~Contenant()
 
 }
 
-void Contenant::setPin(int p)
+void Contenant::miseEnPlace(int p)
 {
-  pin=p;
-  servoContenant.attach(pin);
+  servoContenant.attach(p);
 }
 
 void Contenant::verser(float angle)

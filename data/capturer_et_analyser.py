@@ -4,8 +4,8 @@ import requests
 from google import genai
 from google.genai import types
 
-api_key = 
-webcam_url = 
+api_key = "AQ.Ab8RN6Lqty9QmOxnYxeyrPUNq0nv71W6mbVMX8xKrp4XM5nRLg"
+webcam_url = "http://192.168.109.148:8080/shot.jpg"
 
 def capturer_photo():
     print(f"Capture de la photo depuis {webcam_url} ...")
