@@ -1,5 +1,22 @@
 #include "Ultrason.h"
 #include "Contenant.h"
 #include "Bras.h"
+#include "Pompe.h"
+#include "Bouton.h"
+#include "Plaque.h"
+
+extern Contenant sel, huile;
+extern Bras cuilliere;
+extern bool charge, C, L;
+extern Bouton charger, lancer;
+extern Pompe eau;
+extern Plaque plaque;
 void detectionPresence();
-unsigned long tempsD_Inclinaison(float poids);
+void ajoutSel(int poids);
+void verserHuile(int poids);
+void verserEau(int poids);
+void melanger(int duree);
+unsigned long calibreVersementHuile(int poids);
+void recipientCharge();
+void lancerCuistot();
+void travails();

@@ -1,3 +1,55 @@
 {
-  "plats": []
+  "plats": [
+    {
+      "nom": "Pommes de terre sautees",
+      "preparation_manuelle": [
+        "Laver soigneusement la pomme de terre a l'eau claire.",
+        "Eplucher la pomme de terre a l'aide d'un econome.",
+        "Couper la pomme de terre en des reguliers d'environ 1 a 2 cm.",
+        "Deposer les des de pomme de terre directement dans la cuve du cuiseur."
+      ],
+      "etapes_robot": [
+        {
+          "action": "doser",
+          "temperature_celsius": 20,
+          "duree_secondes": 10,
+          "eau_ml": 0,
+          "sel_g": 3,
+          "sucre_g": 0,
+          "huile_ml": 20,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "temperature_celsius": 140,
+          "duree_secondes": 480,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "sucre_g": 0,
+          "huile_ml": 0,
+          "melanger": true
+        },
+        {
+          "action": "doser",
+          "temperature_celsius": 100,
+          "duree_secondes": 10,
+          "eau_ml": 50,
+          "sel_g": 0,
+          "sucre_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "temperature_celsius": 100,
+          "duree_secondes": 720,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "sucre_g": 0,
+          "huile_ml": 0,
+          "melanger": true
+        }
+      ]
+    }
+  ]
 }
