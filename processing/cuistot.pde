@@ -1,237 +1,241 @@
-import os
-import json
-import time
-import requests
-from google import genai
-from google.genai import types
-from google.genai import errors as genai_errors
+import processing.serial.*;
+import java.io.File;
+import java.lang.*;
 
-api_key = ""      
-webcam_url = ""   
+Serial port;
+int page,i,j;
+String nom;
+JSONArray plats;
+JSONObject json;
+float y;
+Bouton[] choix;
+int nbchoix;
+volatile boolean analyseEnCours;
+volatile boolean resultatPret;
+String ligne;
+JSONArray preparation_manuelle;
+JSONArray preparation_robot;
+String etapesManuelle;
+boolean alerte;
+String etapesRobot;
+int count;
 
-# Nombre de tentatives max et delai (secondes) entre chaque tentative,
-# en cas de probleme de connexion (reseau coupe, telephone injoignable,
-# serveur Gemini surcharge, etc.)
-MAX_TENTATIVES = 3
-DELAI_ENTRE_TENTATIVES = 5
+void setup() {
+  size(1800,1000);
+  port=new Serial(this, "/dev/ttyACM0", 9600);
+  page=0;
+  
+  analyseEnCours=false;
+  resultatPret=false;
+  alerte=false;
+  count=0;
+}
 
-def capturer_photo():
-    for tentative in range(1, MAX_TENTATIVES + 1):
-        try:
-            print(f"Capture de la photo depuis {webcam_url} (tentative {tentative}/{MAX_TENTATIVES})...")
-            reponse = requests.get(webcam_url, timeout=5)
-            reponse.raise_for_status()  # leve une erreur si le telephone ne repond pas
-            print("Photo recuperee avec succes.")
-            return reponse.content
-        except requests.exceptions.RequestException as e:
-            print(f"Erreur de connexion au telephone : {e}")
-            if tentative < MAX_TENTATIVES:
-                print(f"Nouvelle tentative dans {DELAI_ENTRE_TENTATIVES}s...")
-                time.sleep(DELAI_ENTRE_TENTATIVES)
-            else:
-                raise RuntimeError(
-                    "Impossible de recuperer la photo apres plusieurs tentatives. "
-                    "Verifie que l'app IP Webcam est lancee et que le telephone "
-                    "est bien sur le meme reseau WiFi."
-                ) from e
-
-
-def analyser_avec_gemini(image_bytes):
-    """Envoie l'image a Gemini et retourne le plan de preparation en JSON."""
-    client = genai.Client(api_key=api_key)
-
-    schema = {
-        "type": "object",
-        "properties": {
-            "contient_non_comestible": {
-                "type": "boolean",
-                "description": (
-                    "true si la photo contient au moins un objet qui n'est "
-                    "pas un ingredient alimentaire (objet, outil, dechet, "
-                    "produit non alimentaire, etc.)"
-                ),
-            },
-            "message_alerte": {
-                "type": "string",
-                "description": (
-                    "Si contient_non_comestible est true, explique "
-                    "brievement ce qui a ete detecte et qui n'est pas "
-                    "comestible. Laisser une chaine vide sinon."
-                ),
-            },
-            "plats": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "nom": {"type": "string"},
-                        "preparation_manuelle": {
-                            "type": "array",
-                            "description": (
-                                "Instructions textuelles pour l'humain : eplucher, "
-                                "couper, laver, etc. Doivent couvrir TOUTE la "
-                                "preparation necessaire, sans rien laisser a faire "
-                                "une fois le cuiseur lance."
-                            ),
-                            "items": {"type": "string"},
-                        },
-                        "etapes_robot": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "action": {
-                                        "type": "string",
-                                        "enum": ["chauffer", "doser", "melanger", "attendre"],
-                                    },
-                                    "temperature_celsius": {"type": "integer"},
-                                    "duree_secondes": {"type": "integer"},
-                                    "eau_ml": {"type": "integer"},
-                                    "sel_g": {"type": "integer"},
-                                    "sucre_g": {"type": "integer"},
-                                    "huile_ml": {"type": "integer"},
-                                    "melanger": {"type": "boolean"},
-                                },
-                                "required": [
-                                    "action", "temperature_celsius", "duree_secondes",
-                                    "eau_ml", "sel_g", "sucre_g", "huile_ml", "melanger",
-                                ],
-                            },
-                        },
-                    },
-                    "required": ["nom", "preparation_manuelle", "etapes_robot"],
-                },
+void draw(){
+  background(245);
+  
+  ligne=port.readStringUntil('\n');
+    
+  if(ligne!=null)
+  {
+    ligne=trim(ligne);
+    
+    if(ligne.equals("2") && !analyseEnCours)
+    {
+      declencherAnalyse();
+    }
+  }
+      
+  if(page!=0)
+  {
+    for(i=1;i<=nbchoix;i++)
+    {
+      if(page==i)
+      {
+        etapesRobot="";
+        if(ligne.equals("3")){
+          preparation_robot=plats.getJSONObject(i-1).getJSONArray("etapes_robot");
+          if(count < preparation_robot.size()){
+            etapesRobot=etapesRobot+"activer="+Integer.toString(preparation_robot.getJSONObject(count).getInt("activer"))+",";     
+             
+            if (preparation_robot.getJSONObject(count).getInt("eau_ml") > 0){
+              etapesRobot=etapesRobot+"eau="+Integer.toString(preparation_robot.getJSONObject(count).getInt("eau_ml"))+",";     
             }
-        },
-        "required": ["contient_non_comestible", "message_alerte", "plats"],
+                  
+            if (preparation_robot.getJSONObject(count).getInt("sel_g") > 0){
+              etapesRobot=etapesRobot+"sel="+Integer.toString(preparation_robot.getJSONObject(count).getInt("sel_g"))+",";     
+            }
+            
+            if (preparation_robot.getJSONObject(count).getInt("huile_ml") > 0){
+              etapesRobot=etapesRobot+"huile="+Integer.toString(preparation_robot.getJSONObject(count).getInt("huile_ml"))+",";     
+            }
+            
+            if (preparation_robot.getJSONObject(count).getBoolean("melanger")){
+              etapesRobot=etapesRobot+"melanger"+",";     
+            }
+            
+            if(preparation_robot.getJSONObject(count).getInt("duree_secondes") > 0){
+              etapesRobot=etapesRobot+"duree="+Integer.toString(preparation_robot.getJSONObject(count).getInt("duree_secondes"))+",";     
+            }
+            
+            etapesRobot=etapesRobot+"\n";
+            port.write(etapesRobot);
+            count++;
+          }
+          else{
+            count=0;
+            page=0;
+          }
+        }
+        
+        else{
+          etapesManuelle="Veuillez preparer les ingredients avant de les mettre dans la casserole en suivant ces etapes:\n" ;
+          preparation_manuelle=plats.getJSONObject(i-1).getJSONArray("preparation_manuelle");
+          for(j=0;j<preparation_manuelle.size();j++)
+          {
+            etapesManuelle=etapesManuelle+"- "+preparation_manuelle.getString(j)+"\n";
+          }
+          fill(0);
+          textSize(25);
+          textAlign(CENTER);
+          text(etapesManuelle, 900, 500);
+        }
+      }
+    }
+  }
+  
+  if(page==0)
+  {
+    if(analyseEnCours)
+    {
+      fill(0);
+      textSize(17);
+      textAlign(CENTER);
+      text("Analyse en cours, patiente...", 900, 60);
+    }
+  
+    else if(resultatPret)
+    {
+      afficherPlats();
+    }  
+    
+    else
+    {
+      if(alerte){
+        String messageAlerte;
+        
+        messageAlerte=json.getString("message_alerte");
+        fill(0);
+        textSize(25);
+        textAlign(CENTER);
+        text(messageAlerte, 900, 500); 
+      }
+      
+      else{
+        fill(0);
+        textSize(17);
+        textAlign(CENTER);
+        text("Le recipient n'est pas encore charge", 900, 60);
+      }
+    }
+  }
+}
+
+void mousePressed(){
+  for(i=0;i<nbchoix;i++){
+    if(choix[i].clicked()){
+      page=i+1;
+    }
+  }
+}
+
+void afficherPlats(){
+  JSONObject plat;
+  nbchoix=plats.size();
+  choix=new Bouton[nbchoix];
+  y=500-110*3/2;
+  
+  for(i=0;i<nbchoix;i++)
+  {
+    choix[i]=new Bouton();
+    plat=plats.getJSONObject(i);
+    nom=plat.getString("nom");
+    choix[i].setPosition(650,y+i*110,500,100);
+    choix[i].setText(nom);
+    choix[i].setColor(255);
+    choix[i].setTextxPosition(900);
+    textAlign(CENTER);
+    choix[i].setColorh(200,200,200);
+    choix[i].setTextColor(0);
+    choix[i].display();
+  }
+}
+
+void declencherAnalyse(){
+  analyseEnCours=true;
+  resultatPret=false;
+  
+  thread("lancerScriptPython");
+}
+
+void lancerScriptPython() {
+  try {
+    ProcessBuilder pb;
+    String ligne;
+    int codeRetour;
+    pb=new ProcessBuilder("python3", "data/capturer_et_analyser.py");
+    pb.redirectErrorStream(true); //fusionne stdout/stderr, utile pour debug
+    Process process;
+    process=pb.start();
+
+    // Optionnel : afficher la sortie du script dans la console Processing
+    java.io.BufferedReader reader;
+    reader=new java.io.BufferedReader(
+      new java.io.InputStreamReader(process.getInputStream())
+    );
+    
+    while((ligne=reader.readLine()) != null)
+    {
+      println("[python] " + ligne);
     }
 
-    prompt = (
-        "Regarde d'abord attentivement la photo pour verifier si TOUS les "
-        "objets visibles sont des ingredients alimentaires comestibles. "
-        "Si tu detectes un objet non comestible (outil, dechet, embalage, "
-        "objet quelconque, produit non alimentaire, etc.), mets "
-        "contient_non_comestible a true, decris le probleme dans "
-        "message_alerte, et laisse plats vide (liste vide). Dans ce cas, "
-        "n'invente AUCUN plat. "
-        "\n\n"
-        "Si tous les objets sont bien des ingredients alimentaires "
-        "comestibles, mets contient_non_comestible a false et "
-        "message_alerte a une chaine vide, puis continue normalement : "
-        "\n\n"
-        "Les ingredients visibles sur cette photo sont deja physiquement "
-        "presents dans le recipient, MAIS a l'etat brut : non epluches, "
-        "non coupes, non laves, tels qu'ils sortent du marche ou du frigo. "
-        "Identifie les ingredients presents sur la photo, puis propose tous les "
-        "plats realisables avec ces ingredients, prepares en deux phases "
-        "distinctes et sans AUCUNE intervention humaine entre les deux : "
-        "\n\n"
-        "PHASE 1 (humaine) : liste precise de toutes les actions de "
-        "preparation necessaires (eplucher, couper, laver, casser les "
-        "oeufs, etc.) que l'utilisateur doit faire a la main avant de "
-        "mettre les ingredients dans le cuiseur. Cette liste doit rendre "
-        "les ingredients INTEGRALEMENT prets a cuire, sans aucune etape "
-        "manuelle restante apres. "
-        "\n\n"
-        "PHASE 2 (robot, automatique, sans humain) : une fois les "
-        "ingredients prepares et deposes dans le cuiseur, le robot prend "
-        "le relais. Il peut UNIQUEMENT : chauffer a une temperature "
-        "donnee, doser de l'eau, du sel, du sucre, ou de l'huile en "
-        "quantite precise, et activer un melangeur. Il ne peut ni ajouter "
-        "d'autres ingredients solides ni retirer quoi que ce soit du "
-        "cuiseur, ni couper/eplucher quoi que ce soit (ca doit deja avoir "
-        "ete fait en phase 1). Decris cette phase comme une suite "
-        "d'etapes executables avec des valeurs precises : temperatures en "
-        "degres Celsius, durees en secondes, quantites exactes "
-        "d'eau/sel/sucre/huile."
-    )
+    codeRetour=process.waitFor(); //bloque CE thread, pas draw()
 
-    for tentative in range(1, MAX_TENTATIVES + 1):
-        try:
-            print(f"Envoi de l'image a Gemini pour analyse (tentative {tentative}/{MAX_TENTATIVES})...")
-            response = client.models.generate_content(
-                model="gemini-flash-latest",
-                contents=[
-                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-                    prompt,
-                ],
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=schema,
-                ),
-            )
-            print("Reponse recue.")
-            return json.loads(response.text)
-        except (genai_errors.ServerError, genai_errors.ClientError) as e:
-            # ServerError = probleme cote Google (ex: 503 surcharge)
-            # ClientError peut aussi couvrir certains 429 (trop de requetes)
-            print(f"Erreur API Gemini : {e}")
-            if tentative < MAX_TENTATIVES:
-                print(f"Nouvelle tentative dans {DELAI_ENTRE_TENTATIVES}s...")
-                time.sleep(DELAI_ENTRE_TENTATIVES)
-            else:
-                raise RuntimeError(
-                    "Gemini n'a pas repondu apres plusieurs tentatives. "
-                    "Reessaie plus tard."
-                ) from e
-        except requests.exceptions.RequestException as e:
-            print(f"Erreur de connexion internet : {e}")
-            if tentative < MAX_TENTATIVES:
-                print(f"Nouvelle tentative dans {DELAI_ENTRE_TENTATIVES}s...")
-                time.sleep(DELAI_ENTRE_TENTATIVES)
-            else:
-                raise RuntimeError(
-                    "Pas de connexion internet apres plusieurs tentatives."
-                ) from e
+    if(codeRetour==0) 
+    {
+      chargerResultat();
+    } 
+    else 
+    {
+      println("Le script Python a echoue, code retour : " + codeRetour);
+    }
+  }
+  catch (Exception e) {
+    println("Erreur lors du lancement du script : " + e.getMessage());
+  }
+  finally {
+    analyseEnCours=false;
+  }
+}
 
+void chargerResultat() {
+  File f;
+  f=new File(sketchPath("data/recettes_robot.json"));
+  if(!f.exists()){
+    println("Fichier resultat introuvable : " + f.getAbsolutePath());
+    return;
+  }
 
-def afficher_resultat(data):
-    if data.get("contient_non_comestible"):
-        print("\n /!\\ ALERTE : objet(s) non comestible(s) detecte(s) dans le recipient")
-        print(f"    {data.get('message_alerte', '')}")
-        print("    Aucun plat propose. Retire l'objet et reessaie.")
-        return
+  json = loadJSONObject("data/recettes_robot.json");
 
-    for plat in data["plats"]:
-        print(f"\n=== {plat['nom']} ===")
+  if(json.getBoolean("contient_non_comestible"))
+  {
+    resultatPret = false;
+    alerte = true;
+    return;
+  }
 
-        print("  -- Phase 1 : preparation manuelle --")
-        for i, action in enumerate(plat["preparation_manuelle"], start=1):
-            print(f"    {i}. {action}")
-
-        print("  -- Phase 2 : cuisson robot (automatique) --")
-        for i, etape in enumerate(plat["etapes_robot"], start=1):
-            print(f"    Etape {i} [{etape['action']}]:", end=" ")
-            details = []
-            if etape["temperature_celsius"] > 0:
-                details.append(f"{etape['temperature_celsius']}C")
-            if etape["duree_secondes"] > 0:
-                details.append(f"{etape['duree_secondes']}s")
-            if etape["eau_ml"] > 0:
-                details.append(f"eau={etape['eau_ml']}ml")
-            if etape["sel_g"] > 0:
-                details.append(f"sel={etape['sel_g']}g")
-            if etape["sucre_g"] > 0:
-                details.append(f"sucre={etape['sucre_g']}g")
-            if etape["huile_ml"] > 0:
-                details.append(f"huile={etape['huile_ml']}ml")
-            if etape["melanger"]:
-                details.append("melangeur=ON")
-            print(", ".join(details) if details else "-")
-
-
-if __name__ == "__main__":
-    photo = capturer_photo()
-    resultat = analyser_avec_gemini(photo)
-    afficher_resultat(resultat)
-
-    if resultat.get("contient_non_comestible"):
-        # Pas de fichier recettes ecrit : rien d'exploitable pour le robot
-        print("\nAucun fichier recettes_robot.json genere (alerte non comestible).")
-    else:
-        dossier_script = os.path.dirname(os.path.abspath(__file__))
-        chemin_json = os.path.join(dossier_script, "recettes_robot.json")
-
-        with open(chemin_json, "w", encoding="utf-8") as f:
-            json.dump(resultat, f, ensure_ascii=False, indent=2)
-        print(f"\nResultat sauvegarde dans {chemin_json}")
+  alerte = false;
+  plats = json.getJSONArray("plats");
+  resultatPret = true;
+}

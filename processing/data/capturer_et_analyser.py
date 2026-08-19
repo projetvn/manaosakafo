@@ -9,6 +9,11 @@ from google.genai import errors as genai_errors
 api_key = ""      # <-- mets ta cle Gemini ici
 webcam_url = ""   # <-- mets l'URL IP Webcam ici, ex: "http://192.168.1.42:8080/shot.jpg"
 
+# Temperature de chauffe du robot : constante materielle (pas de reglage
+# variable), meme valeur pour toutes les etapes "chauffer" de tous les
+# plats. TODO : mesurer la vraie valeur et la remplacer ici.
+TEMPERATURE_CUISSON_C = None  # <-- a definir une fois mesuree
+
 # Nombre de tentatives max et delai (secondes) entre chaque tentative,
 # en cas de probleme de connexion (reseau coupe, telephone injoignable,
 # serveur Gemini surcharge, etc.)
@@ -84,17 +89,24 @@ def analyser_avec_gemini(image_bytes):
                                         "type": "string",
                                         "enum": ["chauffer", "doser", "melanger", "attendre"],
                                     },
-                                    "temperature_celsius": {"type": "integer"},
+                                    "activer": {
+                                        "type": "integer",
+                                        "enum": [0, 1],
+                                        "description": (
+                                            "Pour l'action 'chauffer' uniquement : 1 pour "
+                                            "allumer la plaque chauffante, 0 pour l'eteindre. "
+                                            "Mettre 0 pour toute autre action."
+                                        ),
+                                    },
                                     "duree_secondes": {"type": "integer"},
                                     "eau_ml": {"type": "integer"},
                                     "sel_g": {"type": "integer"},
-                                    "sucre_g": {"type": "integer"},
                                     "huile_ml": {"type": "integer"},
                                     "melanger": {"type": "boolean"},
                                 },
                                 "required": [
-                                    "action", "temperature_celsius", "duree_secondes",
-                                    "eau_ml", "sel_g", "sucre_g", "huile_ml", "melanger",
+                                    "action", "activer", "duree_secondes",
+                                    "eau_ml", "sel_g", "huile_ml", "melanger",
                                 ],
                             },
                         },
@@ -135,15 +147,24 @@ def analyser_avec_gemini(image_bytes):
         "\n\n"
         "PHASE 2 (robot, automatique, sans humain) : une fois les "
         "ingredients prepares et deposes dans le cuiseur, le robot prend "
-        "le relais. Il peut UNIQUEMENT : chauffer a une temperature "
-        "donnee, doser de l'eau, du sel, du sucre, ou de l'huile en "
-        "quantite precise, et activer un melangeur. Il ne peut ni ajouter "
-        "d'autres ingredients solides ni retirer quoi que ce soit du "
-        "cuiseur, ni couper/eplucher quoi que ce soit (ca doit deja avoir "
-        "ete fait en phase 1). Decris cette phase comme une suite "
-        "d'etapes executables avec des valeurs precises : temperatures en "
-        "degres Celsius, durees en secondes, quantites exactes "
-        "d'eau/sel/sucre/huile."
+        "le relais. Il peut UNIQUEMENT : chauffer (a une temperature "
+        "fixe non reglable, ne pas indiquer de valeur de temperature), "
+        "doser de l'eau, du sel, ou de l'huile en quantite precise, et "
+        "activer un melangeur. Il n'y a PAS de doseur de sucre. Il ne "
+        "peut ni ajouter d'autres ingredients solides ni retirer quoi "
+        "que ce soit du cuiseur, ni couper/eplucher quoi que ce soit (ca "
+        "doit deja avoir ete fait en phase 1). "
+        "Pour controler la plaque chauffante, utilise une etape avec "
+        "action='chauffer' et activer=1 pour l'allumer, puis plus tard "
+        "une autre etape avec action='chauffer' et activer=0 pour "
+        "l'eteindre. Utilise ce mecanisme d'allumage/extinction explicite "
+        "a chaque fois qu'il faut demarrer ou arreter la chauffe (par "
+        "exemple avant de melanger si besoin, ou a la fin de la cuisson). "
+        "Pour toutes les autres actions (doser, melanger, attendre), mets "
+        "toujours activer a 0. "
+        "Decris cette phase comme une suite d'etapes executables avec des "
+        "valeurs precises : durees en secondes, quantites exactes "
+        "d'eau/sel/huile."
     )
 
     for tentative in range(1, MAX_TENTATIVES + 1):
@@ -200,19 +221,18 @@ def afficher_resultat(data):
             print(f"    {i}. {action}")
 
         print("  -- Phase 2 : cuisson robot (automatique) --")
+        print(f"    (temperature de chauffe fixe : {TEMPERATURE_CUISSON_C})")
         for i, etape in enumerate(plat["etapes_robot"], start=1):
             print(f"    Etape {i} [{etape['action']}]:", end=" ")
             details = []
-            if etape["temperature_celsius"] > 0:
-                details.append(f"{etape['temperature_celsius']}C")
+            if etape["action"] == "chauffer":
+                details.append("plaque=ON" if etape["activer"] == 1 else "plaque=OFF")
             if etape["duree_secondes"] > 0:
                 details.append(f"{etape['duree_secondes']}s")
             if etape["eau_ml"] > 0:
                 details.append(f"eau={etape['eau_ml']}ml")
             if etape["sel_g"] > 0:
                 details.append(f"sel={etape['sel_g']}g")
-            if etape["sucre_g"] > 0:
-                details.append(f"sucre={etape['sucre_g']}g")
             if etape["huile_ml"] > 0:
                 details.append(f"huile={etape['huile_ml']}ml")
             if etape["melanger"]:
