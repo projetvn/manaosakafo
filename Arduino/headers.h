@@ -5,6 +5,7 @@
 #include "Bouton.h"
 #include "Plaque.h"
 
+extern Ultrason U;
 extern Contenant sel, huile;
 extern Bras cuilliere;
 extern bool charge, C, L;

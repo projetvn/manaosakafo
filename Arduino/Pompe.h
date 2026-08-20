@@ -7,7 +7,7 @@ class Pompe
     Pompe();
     ~Pompe();
     void mettreEnPlace(int p);
-    void verser(int temps);
+    void verser(unsigned long temps);
   
   private:
     int pin;

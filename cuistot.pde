@@ -6,7 +6,7 @@ Serial port;
 int page,i,j;
 String nom;
 JSONArray plats;
-JSONObject json,plat;
+JSONObject json;
 float y;
 Bouton[] choix;
 int nbchoix;
@@ -14,7 +14,11 @@ volatile boolean analyseEnCours;
 volatile boolean resultatPret;
 String ligne;
 JSONArray preparation_manuelle;
+JSONArray preparation_robot;
 String etapesManuelle;
+boolean alerte;
+String etapesRobot;
+int count;
 
 void setup() {
   size(1800,1000);
@@ -23,27 +27,88 @@ void setup() {
   
   analyseEnCours=false;
   resultatPret=false;
+  alerte=false;
+  count=0;
 }
 
 void draw(){
   background(245);
   
+  ligne=port.readStringUntil('\n');
+    
+  if(ligne!=null)
+  {
+    ligne=trim(ligne);
+    
+    if(ligne.equals("2") && !analyseEnCours)
+    {
+      declencherAnalyse();
+    }
+  }
+      
   if(page!=0)
   {
     for(i=1;i<=nbchoix;i++)
     {
       if(page==i)
       {
-        etapesManuelle="Veuillez preparer les ingredients avant de les mettre dans la casserole en suivant ces etapes:\n" ;
-        preparation_manuelle=plats.getJSONObject(i-1).getJSONArray("preparation_manuelle");
-        for(j=0;j<preparation_manuelle.size();j++)
-        {
-          etapesManuelle=etapesManuelle+"- "+preparation_manuelle.getString(j)+"\n";
+        etapesRobot="";
+        if(ligne.equals("3")){
+          fill(0);
+          textSize(17);
+          textAlign(CENTER);
+          text("Le robot est en phase de preparation", 900, 60);
+          preparation_robot=plats.getJSONObject(i-1).getJSONArray("etapes_robot");
+          if(count < preparation_robot.size()){
+            etapesRobot=etapesRobot+"activer="+Integer.toString(preparation_robot.getJSONObject(count).getInt("activer"))+",";     
+             
+            if (preparation_robot.getJSONObject(count).getInt("eau_ml") > 0){
+              etapesRobot=etapesRobot+"eau="+Integer.toString(preparation_robot.getJSONObject(count).getInt("eau_ml"))+",";     
+            }
+                  
+            if (preparation_robot.getJSONObject(count).getInt("sel_g") > 0){
+              etapesRobot=etapesRobot+"sel="+Integer.toString(preparation_robot.getJSONObject(count).getInt("sel_g"))+",";     
+            }
+            
+            if (preparation_robot.getJSONObject(count).getInt("huile_ml") > 0){
+              etapesRobot=etapesRobot+"huile="+Integer.toString(preparation_robot.getJSONObject(count).getInt("huile_ml"))+",";     
+            }
+            
+            if (preparation_robot.getJSONObject(count).getBoolean("melanger")){
+              etapesRobot=etapesRobot+"melanger"+",";     
+            }
+            
+            if(preparation_robot.getJSONObject(count).getInt("duree_secondes") > 0){
+              etapesRobot=etapesRobot+"duree="+Integer.toString(preparation_robot.getJSONObject(count).getInt("duree_secondes"))+",";     
+            }
+            
+            etapesRobot=etapesRobot+"\n";
+            port.write(etapesRobot);
+            count++;
+          }
+          else{
+            port.write("stop\n");
+            fill(0);
+            textSize(17);
+            textAlign(CENTER);
+            text("Votre repas est pret", 900, 60);
+            count=0;
+            page=0;
+          }
         }
-        fill(0);
-        textSize(25);
-        textAlign(CENTER);
-        text(etapesManuelle, 900, 500);
+        
+        else{
+          etapesManuelle="Veuillez preparer les ingredients avant de les mettre dans la casserole en suivant ces etapes:\n" ;
+          preparation_manuelle=plats.getJSONObject(i-1).getJSONArray("preparation_manuelle");
+          for(j=0;j<preparation_manuelle.size();j++)
+          {
+            etapesManuelle=etapesManuelle+"- "+preparation_manuelle.getString(j)+"\n";
+          }
+          fill(0);
+          textSize(25);
+          textAlign(CENTER);
+          text(etapesManuelle, 900, 500);
+        }
       }
     }
   }
@@ -65,21 +130,22 @@ void draw(){
     
     else
     {
-      ligne=port.readStringUntil('\n');
-  
-      if(ligne!=null)
-      {
-        ligne=trim(ligne);
+      if(alerte){
+        String messageAlerte;
         
-        if(ligne.equals("1") && !analyseEnCours)
-        {
-          declencherAnalyse();
-        }
+        messageAlerte=json.getString("message_alerte");
+        fill(0);
+        textSize(25);
+        textAlign(CENTER);
+        text(messageAlerte, 900, 500); 
       }
-      fill(0);
-      textSize(17);
-      textAlign(CENTER);
-      text("Le recipient n'est pas encore charge", 900, 60);
+      
+      else{
+        fill(0);
+        textSize(17);
+        textAlign(CENTER);
+        text("Le recipient n'est pas encore charge", 900, 60);
+      }
     }
   }
 }
@@ -93,6 +159,7 @@ void mousePressed(){
 }
 
 void afficherPlats(){
+  JSONObject plat;
   nbchoix=plats.size();
   choix=new Bouton[nbchoix];
   y=500-110*3/2;
@@ -125,7 +192,6 @@ void lancerScriptPython() {
     ProcessBuilder pb;
     String ligne;
     int codeRetour;
-    
     pb=new ProcessBuilder("python3", "data/capturer_et_analyser.py");
     pb.redirectErrorStream(true); //fusionne stdout/stderr, utile pour debug
     Process process;
@@ -163,15 +229,22 @@ void lancerScriptPython() {
 
 void chargerResultat() {
   File f;
-  f=new File("data/recettes_robot.json");
-  
-  if(!f.exists()) 
-  {
-    println("Fichier resultat introuvable : recettes_robot.json");
+  f=new File(sketchPath("data/recettes_robot.json"));
+  if(!f.exists()){
+    println("Fichier resultat introuvable : " + f.getAbsolutePath());
     return;
   }
 
-  json=loadJSONObject(f);
-  plats=json.getJSONArray("plats"); 
-  resultatPret=true;
+  json = loadJSONObject("data/recettes_robot.json");
+
+  if(json.getBoolean("contient_non_comestible"))
+  {
+    resultatPret = false;
+    alerte = true;
+    return;
+  }
+
+  alerte = false;
+  plats = json.getJSONArray("plats");
+  resultatPret = true;
 }

@@ -14,11 +14,13 @@ Pompe::~Pompe()
 void Pompe::mettreEnPlace(int p)
 {
   pin = p;
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, HIGH);
 }
 
-void Pompe::verser(int temps)
+void Pompe::verser(unsigned long temps)
 {
-  digitalWrite(pin, HIGH);
-  delay(temps);
   digitalWrite(pin, LOW);
+  delay(temps);
+  digitalWrite(pin, HIGH);
 }

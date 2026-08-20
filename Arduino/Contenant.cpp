@@ -13,6 +13,7 @@ Contenant::~Contenant()
 void Contenant::miseEnPlace(int p)
 {
   servoContenant.attach(p);
+  servoContenant.write(0);
 }
 
 void Contenant::verser(float angle)

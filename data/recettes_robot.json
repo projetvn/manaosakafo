@@ -1,53 +1,118 @@
 {
+  "contient_non_comestible": false,
+  "message_alerte": "",
   "plats": [
     {
-      "nom": "Pommes de terre sautees",
+      "nom": "Chakchouka aux tomates, oignons et fromage",
       "preparation_manuelle": [
-        "Laver soigneusement la pomme de terre a l'eau claire.",
-        "Eplucher la pomme de terre a l'aide d'un econome.",
-        "Couper la pomme de terre en des reguliers d'environ 1 a 2 cm.",
-        "Deposer les des de pomme de terre directement dans la cuve du cuiseur."
+        "Eplucher et emincer finement les oignons.",
+        "Laver les tomates et les couper en petits des.",
+        "Raper le fromage ou le couper en petits des.",
+        "Casser les oeufs et reserver.",
+        "Deposer dans le recipient du cuiseur les oignons eminces et les des de tomates, verser les oeufs entiers par-dessus, puis parsemer de fromage."
       ],
       "etapes_robot": [
         {
           "action": "doser",
-          "temperature_celsius": 20,
-          "duree_secondes": 10,
-          "eau_ml": 0,
+          "activer": "0",
+          "duree_secondes": 5,
+          "eau_ml": 20,
           "sel_g": 3,
-          "sucre_g": 0,
-          "huile_ml": 20,
+          "huile_ml": 15,
           "melanger": false
         },
         {
           "action": "chauffer",
-          "temperature_celsius": 140,
-          "duree_secondes": 480,
+          "activer": "1",
+          "duree_secondes": 0,
           "eau_ml": 0,
           "sel_g": 0,
-          "sucre_g": 0,
           "huile_ml": 0,
-          "melanger": true
+          "melanger": false
         },
+        {
+          "action": "attendre",
+          "activer": "0",
+          "duree_secondes": 600,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        }
+      ]
+    },
+    {
+      "nom": "Oeufs brouilles a la tomate, a l'oignon et au fromage",
+      "preparation_manuelle": [
+        "Eplucher et hacher finement les oignons.",
+        "Laver les tomates, les epepiner et les tailler en tres petits des.",
+        "Raper finement le fromage.",
+        "Casser les oeufs dans un recipient et les battre energiquement a l'aide d'une fourchette.",
+        "Placer tous les ingredients prepares (oeufs battus, des de tomates, oignons haches, fromage rape) dans la cuve du cuiseur."
+      ],
+      "etapes_robot": [
         {
           "action": "doser",
-          "temperature_celsius": 100,
-          "duree_secondes": 10,
-          "eau_ml": 50,
-          "sel_g": 0,
-          "sucre_g": 0,
-          "huile_ml": 0,
+          "activer": "0",
+          "duree_secondes": 5,
+          "eau_ml": 0,
+          "sel_g": 2,
+          "huile_ml": 10,
           "melanger": false
         },
         {
           "action": "chauffer",
-          "temperature_celsius": 100,
-          "duree_secondes": 720,
+          "activer": "1",
+          "duree_secondes": 0,
           "eau_ml": 0,
           "sel_g": 0,
-          "sucre_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "melanger",
+          "activer": "0",
+          "duree_secondes": 180,
+          "eau_ml": 0,
+          "sel_g": 0,
           "huile_ml": 0,
           "melanger": true
+        },
+        {
+          "action": "attendre",
+          "activer": "0",
+          "duree_secondes": 60,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "melanger",
+          "activer": "0",
+          "duree_secondes": 60,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": true
+        },
+        {
+          "action": "chauffer",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
         }
       ]
     }

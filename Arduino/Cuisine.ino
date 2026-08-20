@@ -1,5 +1,6 @@
 #include "headers.h"
 #include "Pompe.h"
+Ultrason U;
 Contenant sel, huile;
 Bras cuilliere;
 Bouton charger, lancer;
@@ -13,22 +14,37 @@ void setup()
   charge = false;
   C=false;
   L=false;
-  sel.miseEnPlace(9);
-  huile.miseEnPlace(10);
 
-  cuilliere.fixer(5, 6);
+  U.setPinEcho(11);
+  U.setPinTrig(12);
 
-  charger.setPin(7);
-  lancer.setPin(8);
+  plaque.setPin(2);
+  eau.mettreEnPlace(4);
+  
+  sel.miseEnPlace(5);
+  huile.miseEnPlace(6);
+
+  cuilliere.fixer(9, 10);
+
+  charger.setPin(8);
+  lancer.setPin(7);
 
   charger.setEtatprecedent(digitalRead(charger.getPin()));
   lancer.setEtatprecedent(digitalRead(lancer.getPin()));
+
+  plaque.eteindre();
+
+  verserEau(250);
+
 }
 
 void loop() 
 {
-  detectionPresence();
-  recipientCharge();
-  lancerCuistot();
-  travails();
+  /*while(charge==false)
+    detectionPresence();
+  while(C==false)
+    recipientCharge();
+  while(L==false)
+    lancerCuistot();
+  travails();*/
 }

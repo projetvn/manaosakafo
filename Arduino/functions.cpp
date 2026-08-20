@@ -8,15 +8,12 @@ void detectionPresence()
 {
   float d;
   d = 19;
-  Ultrason U;
-  U.setPinEcho(8);
-  U.setPinTrig(7);
   if(U.calculDistance()<d)
   {
     if(charge==false)
     {
-      Serial.println("1");
       charge = true;
+      Serial.println("1");
     }
   }
 }
@@ -52,18 +49,13 @@ void lancerCuistot()
 
 void ajoutSel(int poids)
 {
-  int i, temp, nb;
-  int calibrer[16];
-  nb=0;
-  //Remplir le taleau
-  for(i=1; i<16; i++)
-  {
-    if(poids==i)
-    {
-      nb = calibrer[i];
-    }
-  }
-
+  int i, nb;
+  /*
+    1g -> une fois
+    poids-> nb fois
+    nb = poids;
+  */
+  nb = poids;
   for(i=0; i<nb; i++)
   {
     sel.verser(180);
@@ -76,16 +68,27 @@ void verserHuile(int poids)
 {
   int temps;
   temps = 0;
-  huile.verser(100);
+  /*
+    1ml->1000ms
+    poids->temps
+    temps=poids*1000;
+  */
+  temps = poids*1000;
+  huile.verser(180);
   delay(temps);
   huile.remettreEnPlace(0);
 }
 
 void verserEau(int poids)
 {
-  int temps;
-  temps=0;
-  //calibrer;
+  unsigned long temps;
+  /*
+    250ml->9440ms
+    poids->temps;
+    donc temps=(poids*9440)/250
+  */
+  temps = ((unsigned long)poids * 9440UL) / 250;
+  Serial.println(temps);
   eau.verser(temps);
 }
 
@@ -117,52 +120,64 @@ void travails()
     }
     
     buffer[bufferLen]='\0';
-
-    char *token = strtok(buffer, ",");
-    while (token!=NULL && temp2Len<5)
+    //strcpy(buffer,"sel=2,activer=0,duree=1000");
+    if(strcmp(buffer, "stop")==0)
     {
-      strcpy(temp2[temp2Len], token);
-      temp2Len++;
-      token = strtok(NULL, ",");
+      plaque.eteindre();
     }
-
-    for(i=0; i<temp2Len; i++)
+    
+    else
     {
-      debut = millis();
-      char *temp = strtok(temp2[i], "=");
-      int valeur = atoi(strtok(NULL, "="));
-      if(strcmp(temp, "sel")==0)
+      char *token = strtok(buffer, ",");
+      while (token!=NULL && temp2Len<5)
       {
-        ajoutSel(valeur);
+        strcpy(temp2[temp2Len], token);
+        temp2Len++;
+        token = strtok(NULL, ",");
       }
-      else if(strcmp(temp, "huile")==0)
+      for(i=0; i<temp2Len; i++)
       {
-        verserHuile(valeur);
-      }
-      else if(strcmp(temp, "eau")==0)
-      {
-        verserEau(valeur);
-      }
-      else if(strcmp(temp, "melanger")==0)
-      {
-        melanger(valeur);
-      }
-      else if(strcmp(temp, "activer")==0)
-      {
-        if(valeur==1)
-          plaque.activer();
-        else if(valeur==0)
-          plaque.eteindre();
-      }
-
-      else if(strcmp(temp, "duree")==0)
-      {
-        if(millis()-debut<valeur)
+        debut = millis();
+        char *temp = strtok(temp2[i], "=");
+        Serial.println(temp);
+        int valeur = atoi(strtok(NULL, "="));
+        if(strcmp(temp, "sel")==0)
         {
-          delay(valeur-millis()-debut);
+          ajoutSel(valeur);
         }
-        Serial.println("3");
-      }
+        else if(strcmp(temp, "huile")==0)
+        {
+          verserHuile(valeur);
+        }
+        else if(strcmp(temp, "eau")==0)
+        {
+          verserEau(valeur);
+        }
+        else if(strcmp(temp, "melanger")==0)
+        {
+          melanger(valeur);
+        }
+        else if(strcmp(temp, "activer")==0)
+        {
+          if(valeur==1)
+            plaque.activer();
+          else if(valeur==0)
+            plaque.eteindre();
+        }
+
+        else if(strcmp(temp, "duree")==0)
+        {
+          if(millis()-debut<valeur)
+          {
+            delay(valeur-millis()-debut);
+          }
+          Serial.println("3");
+        }
+      } 
     }
   }
+
+  charge=false;
+  C=false;
+  L=false;
 }

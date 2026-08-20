@@ -4,7 +4,7 @@
 
 Bouton::Bouton()
 {
-
+  etatPrecedent=HIGH;
 }
 
 Bouton::~Bouton()
