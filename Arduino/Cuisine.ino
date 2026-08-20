@@ -34,17 +34,15 @@ void setup()
 
   plaque.eteindre();
 
-  verserEau(250);
-
 }
 
 void loop() 
 {
-  /*while(charge==false)
+  while(charge==false)
     detectionPresence();
   while(C==false)
     recipientCharge();
   while(L==false)
     lancerCuistot();
-  travails();*/
+  travails();
 }
