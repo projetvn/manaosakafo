@@ -1,0 +1,130 @@
+{
+  "contient_non_comestible": false,
+  "message_alerte": "",
+  "plats": [
+    {
+      "nom": "Puree de pomme de terre et carotte",
+      "preparation_manuelle": [
+        "Eplucher la pomme de terre",
+        "Eplucher la carotte",
+        "Laver la pomme de terre et la carotte a l'eau claire",
+        "Couper la pomme de terre en cubes d'environ 2 cm",
+        "Couper la carotte en rondelles d'environ 1 cm",
+        "Deposer les cubes de pomme de terre et les rondelles de carotte dans le cuiseur"
+      ],
+      "etapes_robot": [
+        {
+          "action": "doser",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 300,
+          "sel_g": 4,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "activer": "1",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "attendre",
+          "activer": "0",
+          "duree_secondes": 900,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "doser",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 10,
+          "melanger": false
+        },
+        {
+          "action": "melanger",
+          "activer": "0",
+          "duree_secondes": 60,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": true
+        }
+      ]
+    },
+    {
+      "nom": "Carotte et pomme de terre vapeur assaisonnees",
+      "preparation_manuelle": [
+        "Eplucher la carotte et la pomme de terre",
+        "Laver soigneusement les deux legumes",
+        "Couper la carotte en batonnets",
+        "Couper la pomme de terre en quartiers",
+        "Deposer les batonnets et les quartiers dans le cuiseur"
+      ],
+      "etapes_robot": [
+        {
+          "action": "doser",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 150,
+          "sel_g": 3,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "activer": "1",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "attendre",
+          "activer": "0",
+          "duree_secondes": 720,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "chauffer",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 0,
+          "melanger": false
+        },
+        {
+          "action": "doser",
+          "activer": "0",
+          "duree_secondes": 0,
+          "eau_ml": 0,
+          "sel_g": 0,
+          "huile_ml": 8,
+          "melanger": false
+        }
+      ]
+    }
+  ]
+}
