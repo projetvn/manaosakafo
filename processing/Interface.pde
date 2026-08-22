@@ -193,12 +193,7 @@ void afficherPreparationManuelle(int index) {
   text("Suivez les etapes avant de lancer la preparation du robot.",width/2,yy + 55/2);
 }
 
-void afficherPreparationRobot(int index){
-  JSONObject plat;
-
-  plat=plats.getJSONObject(index);
-  preparation_robot=plat.getJSONArray("etapes_robot");
-
+void afficherPreparationRobot(){
   fill(TEXTE);
   textAlign(CENTER);
   textSize(30);
@@ -218,7 +213,7 @@ void afficherPreparationRobot(int index){
   text("Le robot est en phase de preparation",115,160);
 
   textSize(15);
-  text("Etape " + min(count + 1, preparation_robot.size()) +" / " +preparation_robot.size(),115,195);
+  text("Etape " + min(count, preparation_robot.size()) +" / " +preparation_robot.size(),115,195);
 
   fill(BARRE_FOND);
   noStroke();
@@ -234,10 +229,10 @@ void afficherPreparationRobot(int index){
     rect(115,215,(width - 230) * progression,9,5);
   }
 
-  if(count<preparation_robot.size()){
+  if(count-1<preparation_robot.size() && count-1!=0){
     JSONObject etape;
 
-    etape=preparation_robot.getJSONObject(count);
+    etape=preparation_robot.getJSONObject(count-1);
 
     fill(255);
     stroke(BORDURE);
@@ -284,7 +279,7 @@ void afficherPreparationRobot(int index){
   textAlign(CENTER);
   textSize(15);
 
-  if(count<preparation_robot.size()){
+  if(count-1<preparation_robot.size() &&  count-1!=0){
     text("Votre repas est en cours de preparation.",width/2,587);
   }
 
