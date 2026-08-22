@@ -143,6 +143,7 @@ void mousePressed() {
     else{
       page=0;
       resultatPret=false;
+      robot=false;
     }
   }
 }

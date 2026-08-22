@@ -20,14 +20,24 @@ void Bras::fixer(int c, int m)
 
 void Bras::descendre()
 {
-  coud.write(90);
+  int i;
+  for(i=10; i<=85; i+=5)
+  {
+    coud.write(i);
+    delay(250);
+  }
   delay(500);
   melangeur.write(70);
 }
 
 void Bras::monter()
 {
-  melangeur.write(0);
+  int i;
+  melangeur.write(90);
   delay(500);
-  coud.write(0);
+  for(i=80; i>=0; i-=5)
+  {
+    coud.write(i);
+    delay(250); 
+  }
 }

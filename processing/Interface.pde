@@ -229,7 +229,7 @@ void afficherPreparationRobot(){
     rect(115,215,(width - 230) * progression,9,5);
   }
 
-  if(count-1<preparation_robot.size() && count-1!=0){
+  if(count-1<preparation_robot.size() && count!=0){
     JSONObject etape;
 
     etape=preparation_robot.getJSONObject(count-1);
@@ -279,7 +279,7 @@ void afficherPreparationRobot(){
   textAlign(CENTER);
   textSize(15);
 
-  if(count-1<preparation_robot.size() &&  count-1!=0){
+  if(count-1<preparation_robot.size() &&  count!=0){
     text("Votre repas est en cours de preparation.",width/2,587);
   }
 

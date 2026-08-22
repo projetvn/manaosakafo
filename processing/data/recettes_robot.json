@@ -17,15 +17,15 @@
           "action": "doser",
           "activer": "0",
           "duree_secondes": 0,
-          "eau_ml": 300,
-          "sel_g": 4,
+          "eau_ml": 30,
+          "sel_g": 0,
           "huile_ml": 0,
           "melanger": false
         },
         {
           "action": "chauffer",
           "activer": "1",
-          "duree_secondes": 0,
+          "duree_secondes": 5,
           "eau_ml": 0,
           "sel_g": 0,
           "huile_ml": 0,
@@ -34,7 +34,7 @@
         {
           "action": "attendre",
           "activer": "0",
-          "duree_secondes": 900,
+          "duree_secondes": 0,
           "eau_ml": 0,
           "sel_g": 0,
           "huile_ml": 0,
@@ -55,7 +55,7 @@
           "duree_secondes": 0,
           "eau_ml": 0,
           "sel_g": 0,
-          "huile_ml": 10,
+          "huile_ml": 1,
           "melanger": false
         },
         {

@@ -4,6 +4,7 @@
 #include "Pompe.h"
 #include "Bouton.h"
 #include "Plaque.h"
+#include "LedTest.h"
 
 extern Ultrason U;
 extern Contenant sel, huile;
@@ -12,6 +13,7 @@ extern bool charge, C, L;
 extern Bouton charger, lancer;
 extern Pompe eau;
 extern Plaque plaque;
+extern LedTest ledBras, ledSel, ledHuile;
 void detectionPresence();
 void ajoutSel(int poids);
 void verserHuile(int poids);
@@ -20,4 +22,4 @@ void melanger(int duree);
 unsigned long calibreVersementHuile(int poids);
 void recipientCharge();
 void lancerCuistot();
-void travails();
+bool travails();
