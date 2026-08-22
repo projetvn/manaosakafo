@@ -70,6 +70,11 @@ void chargerResultat(){
 }
 
 void envoyerEtapeRobot(){
+  JSONObject plat;
+  
+  plat=plats.getJSONObject(indexPlat);
+  preparation_robot=plat.getJSONArray("etapes_robot");
+  
   if(preparation_robot==null){
     return;
   }
