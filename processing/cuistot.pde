@@ -30,10 +30,16 @@ color INFO;
 color BARRE_FOND;
 color BARRE;
 int indexPlat;
+boolean robot;
+Bouton retour;
+int section;
 
 void setup() {
   size(1300, 700);
-
+  
+  retour=new Bouton();
+  section=0;//1 si afficherplat 2 si afficherprepman 3 si afficheretaperobot
+  
   port=new Serial(this, "/dev/ttyACM0", 9600);
   port.bufferUntil('\n');
 
@@ -42,6 +48,7 @@ void setup() {
   resultatPret=false;
   alerte=false;
   count=0;
+  robot=false;
 
   FOND=color(250, 247, 243);
   CARTE=color(255, 253, 250);
@@ -52,12 +59,19 @@ void setup() {
   BRUN_CLAIR=color(145, 92, 60);
   INFO=color(246, 237, 228);
   BARRE_FOND=color(228, 220, 213);
+  
+  retour.setPosition(20,20,100,30);
+  retour.setColor(TEXTE);
+  retour.setColorh(100, 72, 55);
+  retour.setText("retour");
+  retour.setTextxPosition(70);
+  retour.setTextColor(250);
 }
 
 void draw() {
   background(FOND);
 
-  if(port.available()>0){
+ 
     ligne=port.readStringUntil('\n');
     if(ligne!=null){
       ligne=trim(ligne);
@@ -65,9 +79,9 @@ void draw() {
       println("Arduino : " + ligne);
 
       if(ligne.equals("2") && !analyseEnCours){
-        declencherAnalyse();
+        //declencherAnalyse();
+        chargerResultat();
       }
-    }
   }
 
   if(page==0){
@@ -89,12 +103,16 @@ void draw() {
       indexPlat=page-1;
 
       if(ligne!=null && ligne.equals("3")){
-        afficherPreparationRobot(indexPlat);
+        robot=true;
+        envoyerEtapeRobot();
+      }
+      
+      if(robot){
+         afficherPreparationRobot(indexPlat);
       }
 
-      else {
+      else{
         afficherPreparationManuelle(indexPlat);
-        envoyerEtapeRobot();
       }
     }
   }
@@ -108,6 +126,21 @@ void mousePressed() {
         count=0;
         break;
       }
+    }
+  }
+  
+  if(retour.clicked()){
+    if(section==1){
+      resultatPret=false;
+    }
+    
+    else if(section==2){
+      page=0;
+    }
+    
+    else{
+      page=0;
+      resultatPret=false;
     }
   }
 }

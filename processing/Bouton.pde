@@ -55,11 +55,11 @@ public class Bouton{
     else{
       fill(R,G,B);
     }
-    rect(x,y,w,h,15);
+    rect(x,y,w,h,5);
     if(text!=null){
       fill(textColor);
-      textSize(20);
-      text(text,xtext,y+h/2);
+      textSize(17);
+      text(text,xtext,y+h/2+4);
     }
   }
   

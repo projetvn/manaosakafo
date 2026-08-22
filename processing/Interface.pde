@@ -46,6 +46,11 @@ void afficherAnalyse() {
 }
 
 void afficherPlats(){
+  section=1;
+  
+  textAlign(CENTER);
+  retour.display();
+  
   nbchoix = plats.size();
   choix=new Bouton[nbchoix];
 
@@ -115,6 +120,13 @@ void afficherPlats(){
 }
 
 void afficherPreparationManuelle(int index) {
+  section=2;
+  
+  textAlign(CENTER);
+  retour.display();
+  
+  textAlign(CENTER);
+  retour.display();
   JSONObject plat;
   String etape;
   float yy;
@@ -125,7 +137,7 @@ void afficherPreparationManuelle(int index) {
   fill(TEXTE);
   textAlign(CENTER);
   textSize(30);
-  text("CUISOT AUTOMATIQUE",width/2,50);
+  text("CUISTOT AUTOMATIQUE",width/2,50);
 
   fill(CARTE);
   stroke(BORDURE);
@@ -168,15 +180,17 @@ void afficherPreparationManuelle(int index) {
     textSize(16);
     text(etape,240,yy + hauteur/2);
   }
+  
+  yy=debutY + j * (hauteur + espace);
 
   fill(INFO);
   stroke(BORDURE);
-  rect(80,560,width-160,55,10);
+  rect(80,yy,width-160,55,10);
 
   fill(TEXTE);
   textAlign(CENTER);
   textSize(15);
-  text("Suivez les etapes avant de lancer la preparation du robot.",width/2,587);
+  text("Suivez les etapes avant de lancer la preparation du robot.",width/2,yy + 55/2);
 }
 
 void afficherPreparationRobot(int index){
@@ -232,8 +246,8 @@ void afficherPreparationRobot(int index){
     float yy;
     yy=315;
 
-    if(etape.getInt("activer")>0){
-      afficherParametre("Activer",etape.getInt("activer") + "",yy);
+    if(etape.getString("activer").equals("1")){
+      afficherParametre("Chauffer","ON" + "",yy);
       yy += 43;
     }
 
@@ -253,7 +267,7 @@ void afficherPreparationRobot(int index){
     }
 
     if(etape.getBoolean("melanger")){
-      afficherParametre("Melanger",etape.getInt("duree_secondes") + " sec",yy);
+      afficherParametre("Melanger","ON",yy);
       yy += 43;
     }
 
@@ -276,6 +290,9 @@ void afficherPreparationRobot(int index){
 
   else{
     text("Votre repas est pret.",width/2,587);
+    section=3;
+    textAlign(CENTER);
+    retour.display();
   }
 }
 

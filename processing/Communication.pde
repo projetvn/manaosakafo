@@ -56,7 +56,7 @@ void chargerResultat(){
     return;
   }
 
-  json=loadJSONObject("/home/vatosoa/sketchbook/test/data/recettes_robot.json");
+  json=loadJSONObject("/home/vatosoa/cuistot/manaosakafo/processing/data/recettes_robot.json");
 
   if(json.getBoolean("contient_non_comestible")){
     resultatPret=false;
@@ -112,6 +112,6 @@ void envoyerEtapeRobot(){
     println("Processing -> Arduino : stop");
     count=0;
     page=0;
-    resultatPret=true;
+    resultatPret=false;
   }
 }
