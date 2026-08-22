@@ -112,6 +112,6 @@ void envoyerEtapeRobot(){
     println("Processing -> Arduino : stop");
     count=0;
     page=0;
-    resultatPret=false;
+    resultatPret=true;
   }
 }

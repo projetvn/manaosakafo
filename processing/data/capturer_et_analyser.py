@@ -206,6 +206,28 @@ def analyser_avec_gemini(image_bytes):
                 ) from e
 
 
+def charger_resultat_depuis_fichier(chemin_json=None):
+    """Charge un resultat deja genere depuis recettes_robot.json, sans
+    passer par la webcam ni par Gemini. Utile pour tester la suite du
+    pipeline (envoi vers l'Arduino/Processing, etc.) sans consommer
+    d'appels API ni avoir besoin du telephone/de la webcam."""
+    if chemin_json is None:
+        dossier_script = os.path.dirname(os.path.abspath(__file__))
+        chemin_json = os.path.join(dossier_script, "recettes_robot.json")
+
+    if not os.path.exists(chemin_json):
+        raise FileNotFoundError(
+            f"Fichier introuvable : {chemin_json}. "
+            "Lance d'abord une analyse complete (capture + Gemini) pour "
+            "generer ce fichier, ou fournis un chemin valide via "
+            "l'argument chemin_json."
+        )
+
+    print(f"Chargement du resultat depuis {chemin_json} (pas de capture photo, pas d'appel Gemini)...")
+    with open(chemin_json, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 def afficher_resultat(data):
     if data.get("contient_non_comestible"):
         print("\n /!\\ ALERTE : objet(s) non comestible(s) detecte(s) dans le recipient")
@@ -241,17 +263,7 @@ def afficher_resultat(data):
 
 
 if __name__ == "__main__":
-    photo = capturer_photo()
-    resultat = analyser_avec_gemini(photo)
+    # Mode "fichier existant" : on ne fait plus de capture webcam ni
+    # d'appel a Gemini, on relit simplement recettes_robot.json.
+    resultat = charger_resultat_depuis_fichier()
     afficher_resultat(resultat)
-
-    if resultat.get("contient_non_comestible"):
-        # Pas de fichier recettes ecrit : rien d'exploitable pour le robot
-        print("\nAucun fichier recettes_robot.json genere (alerte non comestible).")
-    else:
-        dossier_script = os.path.dirname(os.path.abspath(__file__))
-        chemin_json = os.path.join(dossier_script, "recettes_robot.json")
-
-        with open(chemin_json, "w", encoding="utf-8") as f:
-            json.dump(resultat, f, ensure_ascii=False, indent=2)
-        print(f"\nResultat sauvegarde dans {chemin_json}")
