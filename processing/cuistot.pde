@@ -104,10 +104,12 @@ void draw() {
 
       if(ligne!=null && ligne.equals("3")){
         robot=true;
-        envoyerEtapeRobot();
       }
       
       if(robot){
+         if(ligne!=null && ligne.equals("3")){
+       	   envoyerEtapeRobot();
+         }
          afficherPreparationRobot(indexPlat);
       }
 
