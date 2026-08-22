@@ -107,10 +107,10 @@ void draw() {
       }
       
       if(robot){
-         if(ligne!=null && ligne.equals("3")){
-       	   envoyerEtapeRobot();
+        if(ligne!=null && ligne.equals("3")){
+           envoyerEtapeRobot();
          }
-         afficherPreparationRobot(indexPlat);
+         afficherPreparationRobot();
       }
 
       else{
