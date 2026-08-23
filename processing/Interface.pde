@@ -291,9 +291,6 @@ void afficherPreparationRobot(){
     text("Votre repas est pret.",width/2,587);
     section=3;
     
-    textSize(15);
-    text("Etape " + preparation_robot.size() +" / " +preparation_robot.size(),115,195);
-    
     fill(BRUN);
     rect(115,215,(width - 230),9,5);
     
