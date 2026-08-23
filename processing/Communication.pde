@@ -11,7 +11,7 @@ void lancerScriptPython() {
     String lignePython;
     int codeRetour;
 
-    pb=new ProcessBuilder("/home/vatosoa/ProjetL2/gemini-env/bin/python3","/home/vatosoa/sketchbook/test/data/test_gemini_json.py");
+    pb=new ProcessBuilder("python3","/home/nyonitiana/manaosakafo/processing/data/capturer_et_analyser.py");
     pb.redirectErrorStream(true);
 
     Process process;
@@ -49,14 +49,14 @@ void lancerScriptPython() {
 void chargerResultat(){
   File f;
 
-  f=new File(sketchPath("/home/vatosoa/sketchbook/test/data/recettes_robot.json"));
+  f=new File(sketchPath("/home/nyonitiana/manaosakafo/processing/data/recettes_robot.json"));
 
   if(!f.exists()){
     println("Fichier resultat introuvable : " + f.getAbsolutePath());
     return;
   }
 
-  json=loadJSONObject("/home/vatosoa/cuistot/manaosakafo/processing/data/recettes_robot.json");
+  json=loadJSONObject("/home/nyonitiana/manaosakafo/processing/data/recettes_robot.json");
 
   if(json.getBoolean("contient_non_comestible")){
     resultatPret=false;

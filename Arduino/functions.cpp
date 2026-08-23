@@ -56,26 +56,32 @@ void ajoutSel(int poids)
     nb = poids;
   */
   nb = poids;
-  for(i=0; i<nb; i++)
+
+  for(i=0; i<nb-1; i++)
   {
-    sel.verser(180);
+    sel.verser(165);
     //ledSel.allumer();
-    delay(500);
+    delay(250);
     //ledSel.eteindre();
-    sel.remettreEnPlace(0);
+    sel.verser(180);
+    delay(250); 
   }
+  sel.verser(90);
+  delay(250);
+  sel.remettreEnPlace(0);
 }
 
 void verserHuile(int poids)
 {
-  int temps, i;
+  int i;
+  unsigned long temps;
   temps = 0;
   /*
     1ml->1000ms
     poids->temps
     temps=poids*1000;
   */
-  temps = poids*1000;
+  temps = poids*1000UL;
   for(i=170; i>30; i-=5)
   {
     huile.verser(i);
@@ -102,9 +108,9 @@ void verserEau(int poids)
 
 }
 
-void melanger(int duree)
+void melanger(unsigned long duree)
 {
-  duree = duree*1000;
+  duree = duree*1000UL;
   cuilliere.descendre();
   delay(duree);
   cuilliere.monter();
@@ -113,7 +119,7 @@ void melanger(int duree)
 bool travails()
 {
   char buffer[50];
-  char temp2[6][10];
+  char temp2[6][16];
   int bufferLen, temp2Len, i;
   unsigned long debut;
   char c;
@@ -140,7 +146,7 @@ bool travails()
     else
     {
       char *token = strtok(buffer, ",");
-      while (token != NULL && temp2Len < 5)
+      while (token != NULL && temp2Len < 6)
       {
         strcpy(temp2[temp2Len], token);
         temp2Len++;
@@ -182,18 +188,26 @@ bool travails()
         }
         else if (strcmp(temp, "activer") == 0)
         {
-          if (valeur == 1)
-            plaque.activer();
-          else if (valeur == 0)
-            plaque.eteindre();
+          if(plaque.getEtat()==valeur)
+          {
+            continue;
+          }
+          else 
+          {
+            if(valeur==1)
+              plaque.activer();
+            else
+             plaque.eteindre();
+          }
         }
         else if (strcmp(temp, "duree") == 0)
         {
-          valeur=valeur*1000;
+          unsigned long val;
+          val = valeur*1000UL;
           unsigned long ecoule = millis() - debut;
-          if(ecoule < (unsigned long)valeur)
+          if(ecoule < (unsigned long)val)
           {
-            delay(valeur - ecoule);
+            delay(val - ecoule);
           }
         }
       }

@@ -17,12 +17,24 @@ void Plaque::setPin(int p)
   pinMode(pin, OUTPUT);
 }
 
+int Plaque::getPin()
+{
+  return pin;
+}
+
+int Plaque::getEtat()
+{
+  return etat;
+}
+
 void Plaque::activer()
 {
   digitalWrite(pin, HIGH);
+  etat=1;
 }
 
 void Plaque::eteindre()
 {
   digitalWrite(pin, LOW);
+  etat=0;
 }

@@ -6,8 +6,8 @@ from google import genai
 from google.genai import types
 from google.genai import errors as genai_errors
 
-api_key = ""      # <-- mets ta cle Gemini ici
-webcam_url = ""   # <-- mets l'URL IP Webcam ici, ex: "http://192.168.1.42:8080/shot.jpg"
+api_key = "AQ.Ab8RN6Lqty9QmOxnYxeyrPUNq0nv71W6mbVMX8xKrp4XM5nRLg"      # <-- mets ta cle Gemini ici
+webcam_url = "http://192.168.11.27:8080/shot.jpg"   # <-- mets l'URL IP Webcam ici, ex: "http://192.168.1.42:8080/shot.jpg"
 
 # Temperature de chauffe du robot : constante materielle (pas de reglage
 # variable), meme valeur pour toutes les etapes "chauffer" de tous les
@@ -17,8 +17,9 @@ TEMPERATURE_CUISSON_C = None  # <-- a definir une fois mesuree
 # Nombre de tentatives max et delai (secondes) entre chaque tentative,
 # en cas de probleme de connexion (reseau coupe, telephone injoignable,
 # serveur Gemini surcharge, etc.)
-MAX_TENTATIVES = 3
+MAX_TENTATIVES = 5
 DELAI_ENTRE_TENTATIVES = 5
+
 
 def capturer_photo():
     for tentative in range(1, MAX_TENTATIVES + 1):
@@ -45,6 +46,7 @@ def analyser_avec_gemini(image_bytes):
     """Envoie l'image a Gemini et retourne le plan de preparation en JSON."""
     client = genai.Client(api_key=api_key)
 
+    # Définition propre du schéma JSON sans contradictions de types
     schema = {
         "type": "object",
         "properties": {
@@ -90,12 +92,12 @@ def analyser_avec_gemini(image_bytes):
                                         "enum": ["chauffer", "doser", "melanger", "attendre"],
                                     },
                                     "activer": {
-                                        "type": "integer",
-                                        "enum": [0, 1],
+                                        "type": "string",  # <--- CORRIGÉ : string car "0" et "1" sont des chaînes
+                                        "enum": ["0", "1"],
                                         "description": (
-                                            "Pour l'action 'chauffer' uniquement : 1 pour "
-                                            "allumer la plaque chauffante, 0 pour l'eteindre. "
-                                            "Mettre 0 pour toute autre action."
+                                            "Pour l'action 'chauffer' uniquement : '1' pour "
+                                            "allumer la plaque chauffante, '0' pour l'eteindre. "
+                                            "Mettre '0' pour toute autre action."
                                         ),
                                     },
                                     "duree_secondes": {"type": "integer"},
@@ -118,6 +120,7 @@ def analyser_avec_gemini(image_bytes):
         "required": ["contient_non_comestible", "message_alerte", "plats"],
     }
 
+    # Le prompt que vous avez fourni
     prompt = (
         "Regarde d'abord attentivement la photo pour verifier si TOUS les "
         "objets visibles sont des ingredients alimentaires comestibles. "
@@ -154,78 +157,128 @@ def analyser_avec_gemini(image_bytes):
         "peut ni ajouter d'autres ingredients solides ni retirer quoi "
         "que ce soit du cuiseur, ni couper/eplucher quoi que ce soit (ca "
         "doit deja avoir ete fait en phase 1). "
-        "Pour controler la plaque chauffante, utilise une etape avec "
-        "action='chauffer' et activer=1 pour l'allumer, puis plus tard "
-        "une autre etape avec action='chauffer' et activer=0 pour "
-        "l'eteindre. Utilise ce mecanisme d'allumage/extinction explicite "
-        "a chaque fois qu'il faut demarrer ou arreter la chauffe (par "
-        "exemple avant de melanger si besoin, ou a la fin de la cuisson). "
+        "\n\n"
+        "REGLE STRICTE ET OBLIGATOIRE SUR LA PLAQUE CHAUFFANTE : "
+        "la plaque a exactement deux etats, ON et OFF. Pour chaque plat, "
+        "si tu inclus une etape action='chauffer' avec activer='0' "
+        "(eteindre), il DOIT OBLIGATOIREMENT exister, plus tot dans la "
+        "meme liste etapes_robot, une etape action='chauffer' avec "
+        "activer='1' (allumer) qui la precede. Autrement dit, on ne peut "
+        "JAMAIS eteindre une plaque qui n'a pas ete allumee avant. Une "
+        "etape activer='1' ne doit jamais etre suivie immediatement par "
+        "une autre etape activer='1' sans etape activer='0' entre les "
+        "deux (pas de double allumage), et de meme on ne met jamais deux "
+        "activer='0' d'affilee sans un activer='1' entre les deux (pas de "
+        "double extinction). Si le plat necessite une cuisson, la toute "
+        "premiere etape 'chauffer' que tu ecris doit avoir activer='1', "
+        "et il doit y avoir une etape 'chauffer' avec activer='0' avant "
+        "la fin de la liste pour bien eteindre la plaque a la fin. Si le "
+        "plat ne necessite aucune cuisson, n'inclus simplement AUCUNE "
+        "etape 'chauffer'. "
+        "\n\n"
+        "Exemple correct (extrait) : "
+        "[chauffer activer=1] -> [doser eau] -> [attendre] -> "
+        "[melanger] -> [chauffer activer=0]. "
+        "Exemple INCORRECT a ne jamais produire : "
+        "[chauffer activer=0] seul, ou bien [chauffer activer=0] suivi "
+        "plus tard d'un autre [chauffer activer=0] sans allumage entre "
+        "les deux. "
+        "\n\n"
         "Pour toutes les autres actions (doser, melanger, attendre), mets "
-        "toujours activer a 0. "
+        "toujours activer a '0'. "
         "Decris cette phase comme une suite d'etapes executables avec des "
         "valeurs precises : durees en secondes, quantites exactes "
         "d'eau/sel/huile."
     )
 
+    # Conversion de l'image brute pour le SDK google-genai
+    image_part = types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+
+    # Boucle de sécurité face aux saturations (Rate Limiting ou Surcharges)
     for tentative in range(1, MAX_TENTATIVES + 1):
         try:
-            print(f"Envoi de l'image a Gemini pour analyse (tentative {tentative}/{MAX_TENTATIVES})...")
+            print(f"Envoi à Gemini pour analyse (tentative {tentative}/{MAX_TENTATIVES})...")
+            
+            # Utilisation du modèle recommandé pour la vision et le respect du JSON strict
             response = client.models.generate_content(
-                model="gemini-flash-latest",
-                contents=[
-                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
-                    prompt,
-                ],
+                model='gemini-2.5-flash',
+                contents=[image_part, prompt],
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     response_schema=schema,
+                    temperature=0.2  # Faible température = respect strict des règles logiques
                 ),
             )
-            print("Reponse recue.")
+            print("Analyse Gemini terminée avec succès.")
+            
+            # Retourne directement le dictionnaire JSON décodé
             return json.loads(response.text)
-        except (genai_errors.ServerError, genai_errors.ClientError) as e:
-            # ServerError = probleme cote Google (ex: 503 surcharge)
-            # ClientError peut aussi couvrir certains 429 (trop de requetes)
-            print(f"Erreur API Gemini : {e}")
+
+        except (genai_errors.APIError, Exception) as e:
+            print(f"Erreur ou saturation détectée lors de l'appel Gemini : {e}")
             if tentative < MAX_TENTATIVES:
-                print(f"Nouvelle tentative dans {DELAI_ENTRE_TENTATIVES}s...")
-                time.sleep(DELAI_ENTRE_TENTATIVES)
+                # Attente exponentielle pour laisser souffler l'API (5s, 10s, 15s...)
+                temps_attente = DELAI_ENTRE_TENTATIVES * tentative
+                print(f"Nouvelle tentative Gemini dans {temps_attente}s...")
+                time.sleep(temps_attente)
             else:
                 raise RuntimeError(
-                    "Gemini n'a pas repondu apres plusieurs tentatives. "
-                    "Reessaie plus tard."
-                ) from e
-        except requests.exceptions.RequestException as e:
-            print(f"Erreur de connexion internet : {e}")
-            if tentative < MAX_TENTATIVES:
-                print(f"Nouvelle tentative dans {DELAI_ENTRE_TENTATIVES}s...")
-                time.sleep(DELAI_ENTRE_TENTATIVES)
-            else:
-                raise RuntimeError(
-                    "Pas de connexion internet apres plusieurs tentatives."
+                    "L'API Gemini est restée inaccessible ou saturée après plusieurs tentatives."
                 ) from e
 
 
-def charger_resultat_depuis_fichier(chemin_json=None):
-    """Charge un resultat deja genere depuis recettes_robot.json, sans
-    passer par la webcam ni par Gemini. Utile pour tester la suite du
-    pipeline (envoi vers l'Arduino/Processing, etc.) sans consommer
-    d'appels API ni avoir besoin du telephone/de la webcam."""
-    if chemin_json is None:
-        dossier_script = os.path.dirname(os.path.abspath(__file__))
-        chemin_json = os.path.join(dossier_script, "recettes_robot.json")
 
-    if not os.path.exists(chemin_json):
-        raise FileNotFoundError(
-            f"Fichier introuvable : {chemin_json}. "
-            "Lance d'abord une analyse complete (capture + Gemini) pour "
-            "generer ce fichier, ou fournis un chemin valide via "
-            "l'argument chemin_json."
-        )
+def verifier_coherence_chauffage(data):
+    """
+    Verifie, pour chaque plat, que les etapes 'chauffer' alternent bien
+    ON (activer=1) puis OFF (activer=0), sans jamais eteindre une plaque
+    qui n'a pas ete allumee, et sans double ON ou double OFF consecutifs.
 
-    print(f"Chargement du resultat depuis {chemin_json} (pas de capture photo, pas d'appel Gemini)...")
-    with open(chemin_json, "r", encoding="utf-8") as f:
-        return json.load(f)
+    Retourne la liste des messages d'erreur trouves (liste vide si tout
+    est coherent).
+    """
+    erreurs = []
+
+    for plat in data.get("plats", []):
+        nom = plat.get("nom", "plat sans nom")
+        etat_plaque = "OFF"  # etat courant suppose au debut de la recette
+
+        for i, etape in enumerate(plat.get("etapes_robot", []), start=1):
+            if etape.get("action") != "chauffer":
+                continue
+
+            activer = etape.get("activer")
+            # activer peut arriver en int (0/1) ou en str ("0"/"1")
+            # selon la version du schema/reponse, donc on normalise.
+            activer_str = str(activer)
+
+            if activer_str == "1":
+                if etat_plaque == "ON":
+                    erreurs.append(
+                        f"[{nom}] Etape {i} : allumage (activer=1) alors que "
+                        "la plaque est deja allumee (double ON)."
+                    )
+                etat_plaque = "ON"
+            elif activer_str == "0":
+                if etat_plaque == "OFF":
+                    erreurs.append(
+                        f"[{nom}] Etape {i} : extinction (activer=0) alors que "
+                        "la plaque n'a jamais ete allumee ou est deja eteinte."
+                    )
+                etat_plaque = "OFF"
+            else:
+                erreurs.append(
+                    f"[{nom}] Etape {i} : valeur 'activer' inattendue "
+                    f"({activer!r}), attendu '0' ou '1'."
+                )
+
+        if etat_plaque == "ON":
+            erreurs.append(
+                f"[{nom}] La plaque reste allumee (activer=1) a la fin de la "
+                "recette : il manque une etape chauffer avec activer=0."
+            )
+
+    return erreurs
 
 
 def afficher_resultat(data):
@@ -248,7 +301,7 @@ def afficher_resultat(data):
             print(f"    Etape {i} [{etape['action']}]:", end=" ")
             details = []
             if etape["action"] == "chauffer":
-                details.append("plaque=ON" if etape["activer"] == 1 else "plaque=OFF")
+                details.append("plaque=ON" if str(etape["activer"]) == "1" else "plaque=OFF")
             if etape["duree_secondes"] > 0:
                 details.append(f"{etape['duree_secondes']}s")
             if etape["eau_ml"] > 0:
@@ -263,7 +316,27 @@ def afficher_resultat(data):
 
 
 if __name__ == "__main__":
-    # Mode "fichier existant" : on ne fait plus de capture webcam ni
-    # d'appel a Gemini, on relit simplement recettes_robot.json.
-    resultat = charger_resultat_depuis_fichier()
+    photo = capturer_photo()
+    resultat = analyser_avec_gemini(photo)
     afficher_resultat(resultat)
+
+    if resultat.get("contient_non_comestible"):
+        # Pas de fichier recettes ecrit : rien d'exploitable pour le robot
+        print("\nAucun fichier recettes_robot.json genere (alerte non comestible).")
+    else:
+        erreurs_chauffage = verifier_coherence_chauffage(resultat)
+        if erreurs_chauffage:
+            print("\n /!\\ ALERTE : incoherences detectees sur la gestion de la plaque chauffante :")
+            for erreur in erreurs_chauffage:
+                print(f"    - {erreur}")
+            print(
+                "    Le fichier recettes_robot.json ne sera PAS ecrit tant que "
+                "ces incoherences ne sont pas resolues. Relance une capture."
+            )
+        else:
+            dossier_script = os.path.dirname(os.path.abspath(__file__))
+            chemin_json = os.path.join(dossier_script, "recettes_robot.json")
+
+            with open(chemin_json, "w", encoding="utf-8") as f:
+                json.dump(resultat, f, ensure_ascii=False, indent=2)
+            print(f"\nResultat sauvegarde dans {chemin_json}")

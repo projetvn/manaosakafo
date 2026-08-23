@@ -18,7 +18,7 @@ void detectionPresence();
 void ajoutSel(int poids);
 void verserHuile(int poids);
 void verserEau(int poids);
-void melanger(int duree);
+void melanger(unsigned long duree);
 unsigned long calibreVersementHuile(int poids);
 void recipientCharge();
 void lancerCuistot();

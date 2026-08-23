@@ -7,12 +7,13 @@ class Plaque
     Plaque();
     ~Plaque();
     void setPin(int p);
-    void getPin(int p);
+    int getPin();
+    int getEtat();
     void activer();
     void eteindre();
 
   private:
-    int pin;
+    int pin, etat;
 };
 
 #endif

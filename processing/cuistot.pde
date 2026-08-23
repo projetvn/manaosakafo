@@ -79,7 +79,7 @@ void draw() {
       println("Arduino : " + ligne);
 
       if(ligne.equals("2") && !analyseEnCours){
-        //declencherAnalyse();
+        declencherAnalyse();
         chargerResultat();
       }
   }

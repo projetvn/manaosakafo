@@ -38,7 +38,6 @@ void setup()
   lancer.setEtatprecedent(digitalRead(lancer.getPin()));
 
   plaque.eteindre();
- // melanger(10);
 
 }
 

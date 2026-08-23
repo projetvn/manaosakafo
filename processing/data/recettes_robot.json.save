@@ -15,7 +15,7 @@
         {
           "action": "doser",
           "activer": "0",
-          "duree_secondes": 0,
+          "duree_secondes": 5,
           "eau_ml": 0,
           "sel_g": 0,
           "huile_ml": 15,
@@ -41,7 +41,7 @@
         },
         {
           "action": "melanger",
-          "activer": "1",
+          "activer": "0",
           "duree_secondes": 180,
           "eau_ml": 0,
           "sel_g": 0,
@@ -50,7 +50,7 @@
         },
         {
           "action": "doser",
-          "activer": "1",
+          "activer": "0",
           "duree_secondes": 10,
           "eau_ml": 100,
           "sel_g": 0,
@@ -59,7 +59,7 @@
         },
         {
           "action": "melanger",
-          "activer": "1",
+          "activer": "0",
           "duree_secondes": 600,
           "eau_ml": 0,
           "sel_g": 0,
@@ -87,7 +87,12 @@
         "Placer tous les morceaux de carotte et de pomme de terre dans la cuve du robot."
       ],
       "etapes_robot": [
-        {
+Regarde la séquence que tu as sous les yeux :
+
+￼
+
+Étape 3: action="chauffer", activer="1"   ← ICI la plaque s'allume (relais ON)
+Étape 4: action="melan        {
           "action": "doser",
           "activer": "0",
           "duree_secondes": 15,
@@ -99,7 +104,7 @@
         {
           "action": "doser",
           "activer": "0",
-          "duree_secondes": 0,
+          "duree_secondes": 5,
           "eau_ml": 0,
           "sel_g": 0,
           "huile_ml": 10,
@@ -108,7 +113,7 @@
         {
           "action": "doser",
           "activer": "0",
-          "duree_secondes": 0,
+          "duree_secondes": 5,
           "eau_ml": 0,
           "sel_g": 4,
           "huile_ml": 0,
@@ -125,7 +130,7 @@
         },
         {
           "action": "attendre",
-          "activer": "1",
+          "activer": "0",
           "duree_secondes": 600,
           "eau_ml": 0,
           "sel_g": 0,
@@ -134,7 +139,7 @@
         },
         {
           "action": "melanger",
-          "activer": "1",
+          "activer": "0",
           "duree_secondes": 60,
           "eau_ml": 0,
           "sel_g": 0,
@@ -143,7 +148,7 @@
         },
         {
           "action": "attendre",
-          "activer": "1",
+          "activer": "0",
           "duree_secondes": 300,
           "eau_ml": 0,
           "sel_g": 0,
