@@ -213,6 +213,10 @@ void afficherPreparationRobot(){
   text("Le robot est en phase de preparation",115,160);
 
   textSize(15);
+  if(count==0)
+  text("Etape " + preparation_robot.size() +" / " +preparation_robot.size(),115,195);
+  
+  else
   text("Etape " + min(count, preparation_robot.size()) +" / " +preparation_robot.size(),115,195);
 
   fill(BARRE_FOND);
