@@ -279,13 +279,60 @@ void afficherPreparationRobot(){
   textAlign(CENTER);
   textSize(15);
 
-  if(count-1<preparation_robot.size() &&  count!=0){
+  if(count-1<preparation_robot.size() && count!=0){
     text("Votre repas est en cours de preparation.",width/2,587);
   }
 
   else{
     text("Votre repas est pret.",width/2,587);
     section=3;
+    
+    textSize(15);
+    text("Etape " + preparation_robot.size() +" / " +preparation_robot.size(),115,195);
+    
+    fill(BRUN);
+    rect(115,215,(width - 230),9,5);
+    
+    JSONObject etape;
+
+    etape=preparation_robot.getJSONObject(preparation_robot.size()-1);
+
+    fill(255);
+    stroke(BORDURE);
+    rect(80,270,width - 160,270,12);
+
+    float yy;
+    yy=315;
+
+    if(etape.getString("activer").equals("1")){
+      afficherParametre("Chauffer","ON" + "",yy);
+      yy += 43;
+    }
+
+    if(etape.getInt("eau_ml")>0){
+      afficherParametre("Eau",etape.getInt("eau_ml") + " ml",yy);
+      yy += 43;
+    }
+
+    if(etape.getInt("sel_g")>0){
+      afficherParametre("Sel",etape.getInt("sel_g") + " g",yy);
+      yy += 43;
+    }
+
+    if(etape.getInt("huile_ml")>0){
+      afficherParametre("Huile",etape.getInt("huile_ml") + " ml",yy);
+      yy += 43;
+    }
+
+    if(etape.getBoolean("melanger")){
+      afficherParametre("Melanger","ON",yy);
+      yy += 43;
+    }
+
+    if(etape.getInt("duree_secondes")>0){
+      afficherParametre("Duree",etape.getInt("duree_secondes") + " sec",yy);
+    }
+    
     textAlign(CENTER);
     retour.display();
   }
