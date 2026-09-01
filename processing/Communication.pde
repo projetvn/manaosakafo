@@ -11,7 +11,16 @@ void lancerScriptPython() {
     String lignePython;
     int codeRetour;
 
-    pb=new ProcessBuilder("python3","/home/nyonitiana/manaosakafo/processing/data/capturer_et_analyser.py");
+    if(etapeProcessus == 1){
+      pb=new ProcessBuilder("/home/vatosoa/ProjetL2/gemini-env/bin/python3", "/home/vatosoa/sketchbook/test/data/test_gemini_json.py", "1");
+    }
+    else if(etapeProcessus == 2){
+      pb=new ProcessBuilder("/home/vatosoa/ProjetL2/gemini-env/bin/python3", "/home/vatosoa/sketchbook/test/data/test_gemini_json.py", "2", categorieChoisie);
+    }
+    else {
+      pb=new ProcessBuilder("/home/vatosoa/ProjetL2/gemini-env/bin/python3", "/home/vatosoa/sketchbook/test/data/test_gemini_json.py", "3", platChoisi);
+    }
+
     pb.redirectErrorStream(true);
 
     Process process;
@@ -31,7 +40,6 @@ void lancerScriptPython() {
     if(codeRetour==0){
       chargerResultat();
     }
-
     else{
       println("Le script Python a echoue, code retour : " + codeRetour);
     }
@@ -49,23 +57,34 @@ void lancerScriptPython() {
 void chargerResultat(){
   File f;
 
-  f=new File(sketchPath("/home/nyonitiana/manaosakafo/processing/data/recettes_robot.json"));
+  f=new File(sketchPath("/home/vatosoa/sketchbook/test/data/recettes_robot.json"));
 
   if(!f.exists()){
     println("Fichier resultat introuvable : " + f.getAbsolutePath());
     return;
   }
 
-  json=loadJSONObject("/home/nyonitiana/manaosakafo/processing/data/recettes_robot.json");
+  json=loadJSONObject("/home/vatosoa/sketchbook/test/data/recettes_robot.json");
 
-  if(json.getBoolean("contient_non_comestible")){
+  if(json.hasKey("contient_non_comestible") && json.getBoolean("contient_non_comestible")){
     resultatPret=false;
     alerte=true;
     return;
   }
 
   alerte=false;
-  plats=json.getJSONArray("plats");
+
+  if(etapeProcessus == 1){
+    categories = json.getJSONArray("categories");
+  } 
+  else if(etapeProcessus == 2){
+    platsDisponibles = json.getJSONArray("plats_disponibles");
+  } 
+  else if(etapeProcessus == 3){
+    plats = json.getJSONArray("plats");
+    page = 1; // Passe directement à l'affichage du plat sélectionné
+  }
+
   resultatPret=true;
 }
 

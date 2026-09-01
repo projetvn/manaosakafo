@@ -34,11 +34,18 @@ boolean robot;
 Bouton retour;
 int section;
 
+// --- NOUVELLES VARIABLES POUR LES 3 ÉTAPES ---
+int etapeProcessus; // 1: Catégories, 2: Liste Plats, 3: Recette Finale
+String categorieChoisie;
+String platChoisi;
+JSONArray categories;
+JSONArray platsDisponibles;
+
 void setup() {
   size(1300, 700);
   
   retour=new Bouton();
-  section=0;//1 si afficherplat 2 si afficherprepman 3 si afficheretaperobot
+  section=0; // 0: Etat initial, 1: Afficher categories, 2: Afficher liste plats, 3: Preparation manuelle, 4: Preparation robot
   
   port=new Serial(this, "/dev/ttyACM0", 9600);
   port.bufferUntil('\n');
@@ -49,6 +56,10 @@ void setup() {
   alerte=false;
   count=0;
   robot=false;
+  
+  etapeProcessus=1;
+  categorieChoisie="";
+  platChoisi="";
 
   FOND=color(250, 247, 243);
   CARTE=color(255, 253, 250);
@@ -71,33 +82,35 @@ void setup() {
 void draw() {
   background(FOND);
 
- 
-    ligne=port.readStringUntil('\n');
-    if(ligne!=null){
-      ligne=trim(ligne);
+  ligne=port.readStringUntil('\n');
+  if(ligne!=null){
+    ligne=trim(ligne);
 
-      println("Arduino : " + ligne);
+    println("Arduino : " + ligne);
 
-      if(ligne.equals("2") && !analyseEnCours){
-        declencherAnalyse();
-        chargerResultat();
-      }
+    if(ligne.equals("2") && !analyseEnCours){
+      etapeProcessus=1;
+      declencherAnalyse(); // <--- DÉCOMMENTÉ ICI
+      // chargerResultat();  <--- COMMENTÉ ICI
+    }
   }
 
   if(page==0){
     if(analyseEnCours){
       afficherAnalyse();
     }
-
     else if(resultatPret){
-      afficherPlats();
+      if(etapeProcessus==1){
+        afficherCategories();
+      }
+      else if(etapeProcessus==2){
+        afficherChoixPlats();
+      }
     }
-
     else{
       afficherEtatInitial();
     }
   }
-
   else{
     if(plats != null && page >= 1 && page <= plats.size()){
       indexPlat=page-1;
@@ -112,7 +125,6 @@ void draw() {
          }
          afficherPreparationRobot();
       }
-
       else{
         afficherPreparationManuelle(indexPlat);
       }
@@ -122,11 +134,28 @@ void draw() {
 
 void mousePressed() {
   if(page==0 && resultatPret){
-    for(i=0;i<nbchoix;i++){
-      if(choix[i].clicked()){
-        page=i+1;
-        count=0;
-        break;
+    // Étape 1 : Choix du type de cuisine
+    if(etapeProcessus==1){
+      for(i=0; i<nbchoix; i++){
+        if(choix[i].clicked()){
+          categorieChoisie = categories.getString(i);
+          etapeProcessus = 2;
+          resultatPret = false;
+          declencherAnalyse(); // Lance Gemini pour l'étape 2 avec la catégorie choisie
+          break;
+        }
+      }
+    }
+    // Étape 2 : Choix du plat dans la liste
+    else if(etapeProcessus==2){
+      for(i=0; i<nbchoix; i++){
+        if(choix[i].clicked()){
+          platChoisi = platsDisponibles.getString(i);
+          etapeProcessus = 3;
+          resultatPret = false;
+          declencherAnalyse(); // Lance Gemini pour l'étape 3 pour générer les étapes de cuisson
+          break;
+        }
       }
     }
   }
@@ -134,16 +163,23 @@ void mousePressed() {
   if(retour.clicked()){
     if(section==1){
       resultatPret=false;
+      etapeProcessus=1;
     }
-    
     else if(section==2){
       page=0;
+      resultatPret=true;
+      etapeProcessus=1;
     }
-    
+    else if(section==3){
+      page=0;
+      resultatPret=true;
+      etapeProcessus=2;
+    }
     else{
       page=0;
       resultatPret=false;
       robot=false;
+      etapeProcessus=1;
     }
   }
 }

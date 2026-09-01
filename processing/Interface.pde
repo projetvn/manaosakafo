@@ -45,14 +45,14 @@ void afficherAnalyse() {
   text("Analyse en cours, patiente...",width/2,315);
 }
 
-void afficherPlats(){
+// --- ÉTAPE 1 : Affichage des types de cuisine ---
+void afficherCategories(){
   section=1;
-  
   textAlign(CENTER);
   retour.display();
-  
-  nbchoix = plats.size();
-  choix=new Bouton[nbchoix];
+
+  nbchoix = categories.size();
+  choix = new Bouton[nbchoix];
 
   fill(TEXTE);
   textAlign(CENTER);
@@ -65,38 +65,30 @@ void afficherPlats(){
 
   fill(TEXTE);
   textSize(25);
-  text("Choisissez votre plat",width/2,145);
+  text("Choisissez le type de cuisine",width/2,145);
 
   fill(TEXTE2);
   textSize(16);
-  text("Les recettes disponibles sont basees sur les ingredients detectes",width/2,180);
+  text("Types de spécialités réalisables avec les ingrédients détectés",width/2,180);
 
-  float hauteur;
-  float espace;
-  float total;
-  float debutY;
+  float hauteur=65, espace=12, debutY=220;
 
-  espace=12;
-  hauteur=65;
-  total=nbchoix * hauteur + (nbchoix - 1) * espace;
-  debutY=220;
+  for(i=0; i<nbchoix; i++){
+    String catName = categories.getString(i);
+    float yy = debutY + i * (hauteur + espace);
 
-  for(i=0;i<nbchoix;i++){
-    JSONObject plat;
-    plat=plats.getJSONObject(i);
-    nom=plat.getString("nom");
+    // 1. D'abord on instancie et on affiche le bouton (fond blanc)
+    choix[i] = new Bouton();
+    choix[i].setPosition(130,yy,width - 260,hauteur);
+    choix[i].setText("");
+    choix[i].setColor(255);
+    choix[i].setColorh(245, 240, 235);
+    choix[i].display(); // <--- DESSIN DU FOND DU BOUTON ICI
 
-    float yy;
-    yy=debutY + i * (hauteur + espace);
-
-    fill(255);
-    stroke(BORDURE);
-    rect(130,yy,width-260,hauteur,10);
-
+    // 2. Ensuite on écrit le texte par-dessus le bouton !
     fill(BRUN_CLAIR);
     textAlign(CENTER);
     textSize(20);
-
     text(nf(i+1, 2),180,yy + hauteur/2);
 
     stroke(BORDURE);
@@ -105,28 +97,82 @@ void afficherPlats(){
     fill(TEXTE);
     textAlign(LEFT, CENTER);
     textSize(18);
-    text(nom,260,yy + hauteur/2);
+    text(catName,260,yy + hauteur/2);
 
     fill(BRUN);
     textAlign(CENTER);
     textSize(27);
     text("›",width - 170,yy + hauteur/2);
+  }
+}
 
+// --- ÉTAPE 2 : Affichage des plats selon la catégorie choisie ---
+void afficherChoixPlats(){
+  section=2;
+  textAlign(CENTER);
+  retour.display();
+
+  nbchoix = platsDisponibles.size();
+  choix = new Bouton[nbchoix];
+
+  fill(TEXTE);
+  textAlign(CENTER);
+  textSize(30);
+  text("CUISTOT AUTOMATIQUE",width/2,50);
+
+  fill(CARTE);
+  stroke(BORDURE);
+  rect(50,100,width-100,500,18);
+
+  fill(TEXTE);
+  textSize(25);
+  text("Choisissez votre plat (" + categorieChoisie + ")",width/2,145);
+
+  fill(TEXTE2);
+  textSize(16);
+  text("Sélectionnez le plat que vous souhaitez préparer",width/2,180);
+
+  float hauteur=65, espace=12, debutY=220;
+
+  for(i=0; i<nbchoix; i++){
+    String platNom = platsDisponibles.getString(i);
+    float yy = debutY + i * (hauteur + espace);
+
+    // 1. D'abord le bouton
     choix[i] = new Bouton();
     choix[i].setPosition(130,yy,width - 260,hauteur);
     choix[i].setText("");
     choix[i].setColor(255);
+    choix[i].setColorh(245, 240, 235);
+    choix[i].display(); // <--- DESSIN DU FOND DU BOUTON ICI
+
+    // 2. Ensuite le texte par-dessus
+    fill(BRUN_CLAIR);
+    textAlign(CENTER);
+    textSize(20);
+    text(nf(i+1, 2),180,yy + hauteur/2);
+
+    stroke(BORDURE);
+    line(230,yy,230,yy + hauteur);
+
+    fill(TEXTE);
+    textAlign(LEFT, CENTER);
+    textSize(18);
+    text(platNom,260,yy + hauteur/2);
+
+    fill(BRUN);
+    textAlign(CENTER);
+    textSize(27);
+    text("›",width - 170,yy + hauteur/2);
   }
 }
 
 void afficherPreparationManuelle(int index) {
-  section=2;
+  section=3;
   
   textAlign(CENTER);
   retour.display();
   
-  textAlign(CENTER);
-  retour.display();
   JSONObject plat;
   String etape;
   float yy;
@@ -151,13 +197,7 @@ void afficherPreparationManuelle(int index) {
   textSize(16);
   text("Preparez les ingredients avant de les mettre dans la casserole",width/2,180);
 
-  float hauteur;
-  float espace;
-  float debutY;
-
-  hauteur=55;
-  espace=10;
-  debutY=220;
+  float hauteur=55, espace=10, debutY=220;
 
   for(j=0;j<preparation_manuelle.size();j++){
     etape=preparation_manuelle.getString(j);
@@ -289,7 +329,7 @@ void afficherPreparationRobot(){
 
   else{
     text("Votre repas est pret.",width/2,587);
-    section=3;
+    section=4;
     
     fill(BRUN);
     rect(115,215,(width - 230),9,5);
