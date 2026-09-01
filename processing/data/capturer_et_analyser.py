@@ -136,8 +136,8 @@ def etape3_etapes_plat(client, image_bytes, plat_choisi):
                                         "enum": ["chauffer", "doser", "melanger", "attendre"],
                                     },
                                     "activer": {
-                                        "type": "integer",
-                                        "enum": ["0", "1"],  # Guillemets requis pour validation Pydantic
+                                        "type": "string",
+                                        "enum": ["0", "1"],
                                         "description": "1 pour allumer la plaque chauffante, 0 pour l'éteindre.",
                                     },
                                     "duree_secondes": {"type": "integer"},
