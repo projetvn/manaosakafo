@@ -10,7 +10,7 @@ from google.genai import types
 # CONFIGURATION
 # -------------------------------------------------------------------------
 API_KEY = ""  # <-- Mets ta clé Gemini ici
-URL_WEBCAM = "http://192.168.1.50:8080/shot.jpg"  # <-- Remplace par l'IP de ton smartphone / webcam IP
+URL_WEBCAM = "http://192.168.11.83:8080/shot.jpg"  # <-- Remplace par l'IP de ton smartphone / webcam IP
 MODELE_GEMINI = "gemini-3.6-flash"
 
 def capturer_photo_webcam(url):
